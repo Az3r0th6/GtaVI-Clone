@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-display: 'Oswald', 'Anton', sans-serif;
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #11101d;
+    color: #ffffff;
+  }
+}
+
+.font-display {
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 0.01em;
+}
+
+.font-condensed {
+  font-family: 'Anton', 'Oswald', sans-serif;
+  letter-spacing: 0.03em;
+}
+
+.vice-gradient-text {
+  background: linear-gradient(135deg, #ff799d 0%, #ffb199 55%, #ffe29f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.vice-banner-gradient {
+  background: linear-gradient(90deg, #b85d8e 0%, #f79d84 35%, #fbd0a0 50%, #f79d84 65%, #b85d8e 100%);
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+.animate-float-chevron {
+  animation: floatSlow 2.4s ease-in-out infinite;
+}

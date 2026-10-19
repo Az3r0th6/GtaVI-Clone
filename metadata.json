@@ -1,0 +1,6 @@
+{
+  "name": "Grand Theft Auto VI — Rockstar Games",
+  "description": "Experience the official Grand Theft Auto VI showcase. Watch the Launch Trailer, explore Vice City and the state of Leonida, preview in-game radio stations, and pre-order for PlayStation 5 and Xbox Series X|S.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
