@@ -1,7 +1,9 @@
 {
-  "name": "react-example",
+  "name": "gtavi-clone",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "author": "Martin Calvo Ruiz <tinchoccr@gmail.com>",
+  "homepage": "https://gtavi-clone.onrender.com",
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",

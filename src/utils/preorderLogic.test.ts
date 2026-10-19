@@ -62,3 +62,38 @@ test('validatePropagandaSignup validates email and ESRB Mature 17+ birth year', 
   assert.equal(validatePropagandaSignup('fan@rockstargames.com', '2015').valid, false);
   assert.equal(validatePropagandaSignup('fan@rockstargames.com', '1998').valid, true);
 });
+
+import {
+  parseRouteToModal,
+  modalToPathname,
+  validateDeveloperProfile,
+  DEFAULT_DEVELOPER_PROFILE,
+} from './preorderLogic.ts';
+
+test('parseRouteToModal and modalToPathname map /VI and sub-routes accurately', () => {
+  assert.deepEqual(parseRouteToModal('/VI'), { type: 'none' });
+  assert.deepEqual(parseRouteToModal('/VI/launch-trailer'), {
+    type: 'trailer',
+    trailerId: 'launch',
+  });
+  assert.deepEqual(parseRouteToModal('/VI/pre-order'), {
+    type: 'preorder',
+    initialEdition: 'ultimate',
+  });
+  assert.deepEqual(parseRouteToModal('/VI/developer'), {
+    type: 'developer',
+  });
+  assert.equal(modalToPathname({ type: 'none' }), '/VI');
+  assert.equal(modalToPathname({ type: 'trailer', trailerId: 'launch' }), '/VI/launch-trailer');
+  assert.equal(modalToPathname({ type: 'preorder' }), '/VI/pre-order');
+  assert.equal(modalToPathname({ type: 'developer' }), '/VI/developer');
+});
+
+test('validateDeveloperProfile validates developer name and preserves defaults', () => {
+  assert.equal(validateDeveloperProfile({ name: 'T' }).valid, false);
+  const res = validateDeveloperProfile({ name: 'Martin Calvo Ruiz', role: 'Full-Stack Engineer' });
+  assert.equal(res.valid, true);
+  assert.equal(res.sanitized?.name, 'Martin Calvo Ruiz');
+  assert.equal(res.sanitized?.role, 'Full-Stack Engineer');
+  assert.equal(res.sanitized?.renderUrl, DEFAULT_DEVELOPER_PROFILE.renderUrl);
+});

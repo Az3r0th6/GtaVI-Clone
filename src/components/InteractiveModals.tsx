@@ -12,9 +12,11 @@ import {
   validatePreorderInput,
   calculateOrderBreakdown,
   validatePropagandaSignup,
+  validateDeveloperProfile,
   type EditionId,
   type PlatformId,
   type FormatId,
+  type DeveloperProfile,
 } from '../utils/preorderLogic';
 import { ViLogoSvg, Ps5BadgeSvg, XboxBadgeSvg, RockstarStarSvg } from './RockstarIcons';
 
@@ -28,7 +30,8 @@ export type ActiveModal =
   | { type: 'store'; initialCategory?: 'Merchandise' | 'Collector’s Box' }
   | { type: 'article'; article: NewswireArticle }
   | { type: 'propaganda' }
-  | { type: 'nav' };
+  | { type: 'nav' }
+  | { type: 'developer' };
 
 interface StoredReservation {
   id: string;
@@ -54,6 +57,8 @@ interface InteractiveModalsProps {
   reservations: StoredReservation[];
   onReservationCreated: (record: StoredReservation) => void;
   onPropagandaSubscribed: (newTotal: number) => void;
+  developerProfile: DeveloperProfile;
+  onUpdateDeveloperProfile: (profile: DeveloperProfile) => void;
 }
 
 export const InteractiveModals: React.FC<InteractiveModalsProps> = ({
@@ -67,6 +72,8 @@ export const InteractiveModals: React.FC<InteractiveModalsProps> = ({
   reservations,
   onReservationCreated,
   onPropagandaSubscribed,
+  developerProfile,
+  onUpdateDeveloperProfile,
 }) => {
   // Trailer Modal State
   const [selectedTrailerId, setSelectedTrailerId] = useState<'launch' | 'extended' | 'trailer2' | 'trailer1'>('launch');
@@ -109,6 +116,21 @@ export const InteractiveModals: React.FC<InteractiveModalsProps> = ({
   const [propError, setPropError] = useState<string | null>(null);
   const [propSuccess, setPropSuccess] = useState(false);
 
+  // Developer Profile State
+  const [devName, setDevName] = useState(developerProfile.name);
+  const [devRole, setDevRole] = useState(developerProfile.role);
+  const [devEmail, setDevEmail] = useState(developerProfile.email);
+  const [devRenderUrl, setDevRenderUrl] = useState(developerProfile.renderUrl);
+  const [devError, setDevError] = useState<string | null>(null);
+  const [devSaved, setDevSaved] = useState(false);
+
+  useEffect(() => {
+    setDevName(developerProfile.name);
+    setDevRole(developerProfile.role);
+    setDevEmail(developerProfile.email);
+    setDevRenderUrl(developerProfile.renderUrl);
+  }, [developerProfile]);
+
   useEffect(() => {
     if (activeModal.type === 'trailer') {
       setSelectedTrailerId(activeModal.trailerId);
@@ -122,6 +144,9 @@ export const InteractiveModals: React.FC<InteractiveModalsProps> = ({
       }
       setConfirmedOrder(null);
       setFormErrors({});
+    } else if (activeModal.type === 'developer') {
+      setDevSaved(false);
+      setDevError(null);
     }
   }, [activeModal]);
 
@@ -1299,6 +1324,167 @@ export const InteractiveModals: React.FC<InteractiveModalsProps> = ({
               </button>
             </form>
           )}
+        </div>
+      )}
+
+      {/* Full-Stack Developer Credits & Signature Customization Modal */}
+      {activeModal.type === 'developer' && (
+        <div className="relative w-full max-w-2xl bg-[#151426] border border-[#ffb8c9]/30 rounded-3xl p-6 sm:p-10 text-white shadow-2xl my-auto space-y-6">
+          <div className="flex items-center justify-between pb-6 border-b border-white/10">
+            <div className="flex items-center gap-3.5">
+              <ViLogoSvg className="w-10 h-7 text-[#ffb8c9]" />
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#fbd08c]">
+                  Full-Stack Engineering Credits
+                </p>
+                <h2 className="font-display font-bold text-2xl sm:text-3xl uppercase text-white">
+                  Desarrollado por {developerProfile.name}
+                </h2>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close Developer Credits"
+              className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-xs font-bold uppercase cursor-pointer"
+            >
+              Close ×
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[#1c1a33] rounded-2xl p-5 border border-white/10">
+            <div>
+              <p className="text-[11px] uppercase tracking-wider text-white/50 font-semibold">
+                Autor / Desarrollador
+              </p>
+              <p className="font-bold text-lg text-[#ffb8c9] mt-0.5">{developerProfile.name}</p>
+              <p className="text-xs text-white/75">{developerProfile.role}</p>
+            </div>
+            <div>
+              <p className="text-[11px] uppercase tracking-wider text-white/50 font-semibold">
+                Producción en Render
+              </p>
+              <a
+                href={developerProfile.renderUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold text-sm text-[#e8f878] hover:underline break-all block mt-1"
+              >
+                {developerProfile.renderUrl}
+              </a>
+              <p className="text-xs text-white/60 mt-0.5">{developerProfile.email}</p>
+            </div>
+          </div>
+
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const check = validateDeveloperProfile({
+                name: devName,
+                role: devRole,
+                email: devEmail,
+                renderUrl: devRenderUrl,
+              });
+              if (!check.valid || !check.sanitized) {
+                setDevError(check.error || 'Datos inválidos.');
+                return;
+              }
+              setDevError(null);
+              onUpdateDeveloperProfile(check.sanitized);
+              setDevSaved(true);
+            }}
+            noValidate
+            className="space-y-4 pt-2"
+          >
+            <p className="text-xs sm:text-sm text-white/80 font-medium">
+              Personaliza cómo aparece tu nombre y firma en toda la página (se guarda en el servidor y en tu navegador):
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="dev-name" className="block text-xs font-bold uppercase text-white/80 mb-1.5">
+                  Tu Nombre / Firma
+                </label>
+                <input
+                  id="dev-name"
+                  type="text"
+                  value={devName}
+                  onChange={(e) => {
+                    setDevName(e.target.value);
+                    setDevSaved(false);
+                  }}
+                  placeholder="Martin Calvo Ruiz"
+                  className="w-full px-4 py-2.5 rounded-xl bg-[#121120] border border-white/15 text-sm text-white focus:outline-none focus:border-[#ffb8c9]"
+                />
+              </div>
+              <div>
+                <label htmlFor="dev-role" className="block text-xs font-bold uppercase text-white/80 mb-1.5">
+                  Rol / Especialidad
+                </label>
+                <input
+                  id="dev-role"
+                  type="text"
+                  value={devRole}
+                  onChange={(e) => {
+                    setDevRole(e.target.value);
+                    setDevSaved(false);
+                  }}
+                  placeholder="Full-Stack Developer"
+                  className="w-full px-4 py-2.5 rounded-xl bg-[#121120] border border-white/15 text-sm text-white focus:outline-none focus:border-[#ffb8c9]"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="dev-email" className="block text-xs font-bold uppercase text-white/80 mb-1.5">
+                  Email de Contacto
+                </label>
+                <input
+                  id="dev-email"
+                  type="email"
+                  value={devEmail}
+                  onChange={(e) => {
+                    setDevEmail(e.target.value);
+                    setDevSaved(false);
+                  }}
+                  placeholder="tinchoccr@gmail.com"
+                  className="w-full px-4 py-2.5 rounded-xl bg-[#121120] border border-white/15 text-sm text-white focus:outline-none focus:border-[#ffb8c9]"
+                />
+              </div>
+              <div>
+                <label htmlFor="dev-render" className="block text-xs font-bold uppercase text-white/80 mb-1.5">
+                  URL de Producción (Render)
+                </label>
+                <input
+                  id="dev-render"
+                  type="url"
+                  value={devRenderUrl}
+                  onChange={(e) => {
+                    setDevRenderUrl(e.target.value);
+                    setDevSaved(false);
+                  }}
+                  placeholder="https://gtavi-clone.onrender.com"
+                  className="w-full px-4 py-2.5 rounded-xl bg-[#121120] border border-white/15 text-sm text-white focus:outline-none focus:border-[#ffb8c9]"
+                />
+              </div>
+            </div>
+
+            {devError && <p className="text-xs text-[#ff799d] font-medium">{devError}</p>}
+            {devSaved && (
+              <p className="text-xs text-[#e8f878] font-bold">
+                ✓ ¡Firma actualizada! Ahora toda la página muestra &ldquo;Desarrollado por {devName}&rdquo;.
+              </p>
+            )}
+
+            <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
+              <button
+                type="submit"
+                className="px-7 py-3 rounded-full bg-[#ffb8c9] hover:bg-white text-[#11101d] font-extrabold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+              >
+                Guardar Firma en la Web
+              </button>
+            </div>
+          </form>
         </div>
       )}
     </div>

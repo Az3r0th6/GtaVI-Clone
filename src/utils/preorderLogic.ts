@@ -151,3 +151,97 @@ export function validatePropagandaSignup(email: string, birthYear: string): { va
   }
   return { valid: true };
 }
+
+export interface DeveloperProfile {
+  name: string;
+  role: string;
+  email: string;
+  renderUrl: string;
+  githubUrl: string;
+}
+
+export const DEFAULT_DEVELOPER_PROFILE: DeveloperProfile = {
+  name: 'Martin Calvo Ruiz',
+  role: 'Full-Stack Developer',
+  email: 'tinchoccr@gmail.com',
+  renderUrl: 'https://gtavi-clone.onrender.com',
+  githubUrl: 'https://gtavi-clone.onrender.com',
+};
+
+export function validateDeveloperProfile(input: Partial<DeveloperProfile>): {
+  valid: boolean;
+  error?: string;
+  sanitized?: DeveloperProfile;
+} {
+  const name = (input.name || '').trim();
+  if (!name || name.length < 2) {
+    return { valid: false, error: 'El nombre del desarrollador debe tener al menos 2 caracteres.' };
+  }
+  const role = (input.role || DEFAULT_DEVELOPER_PROFILE.role).trim() || DEFAULT_DEVELOPER_PROFILE.role;
+  const email = (input.email || DEFAULT_DEVELOPER_PROFILE.email).trim() || DEFAULT_DEVELOPER_PROFILE.email;
+  const renderUrl =
+    (input.renderUrl || DEFAULT_DEVELOPER_PROFILE.renderUrl).trim() || DEFAULT_DEVELOPER_PROFILE.renderUrl;
+  const githubUrl =
+    (input.githubUrl || DEFAULT_DEVELOPER_PROFILE.githubUrl).trim() || DEFAULT_DEVELOPER_PROFILE.githubUrl;
+
+  return {
+    valid: true,
+    sanitized: {
+      name,
+      role,
+      email,
+      renderUrl,
+      githubUrl,
+    },
+  };
+}
+
+export interface RouteModalState {
+  type: 'none' | 'trailer' | 'preorder' | 'radio' | 'leonida' | 'media' | 'store' | 'propaganda' | 'nav' | 'developer';
+  trailerId?: 'launch' | 'extended' | 'trailer2' | 'trailer1';
+  initialEdition?: EditionId;
+}
+
+export function parseRouteToModal(pathname: string): RouteModalState {
+  const clean = (pathname || '/').replace(/\/+$/, '') || '/';
+  const lower = clean.toLowerCase();
+
+  if (lower === '/vi/launch-trailer') return { type: 'trailer', trailerId: 'launch' };
+  if (lower === '/vi/extended-look') return { type: 'trailer', trailerId: 'extended' };
+  if (lower === '/vi/trailer-2') return { type: 'trailer', trailerId: 'trailer2' };
+  if (lower === '/vi/trailer-1') return { type: 'trailer', trailerId: 'trailer1' };
+  if (lower === '/vi/pre-order') return { type: 'preorder', initialEdition: 'ultimate' };
+  if (lower === '/vi/radio') return { type: 'radio' };
+  if (lower === '/vi/leonida') return { type: 'leonida' };
+  if (lower === '/vi/media') return { type: 'media' };
+  if (lower === '/vi/shop') return { type: 'store' };
+  if (lower === '/vi/propaganda') return { type: 'propaganda' };
+  if (lower === '/vi/developer') return { type: 'developer' };
+  return { type: 'none' };
+}
+
+export function modalToPathname(modal: { type: string; trailerId?: string }): string {
+  switch (modal.type) {
+    case 'trailer':
+      if (modal.trailerId === 'extended') return '/VI/extended-look';
+      if (modal.trailerId === 'trailer2') return '/VI/trailer-2';
+      if (modal.trailerId === 'trailer1') return '/VI/trailer-1';
+      return '/VI/launch-trailer';
+    case 'preorder':
+      return '/VI/pre-order';
+    case 'radio':
+      return '/VI/radio';
+    case 'leonida':
+      return '/VI/leonida';
+    case 'media':
+      return '/VI/media';
+    case 'store':
+      return '/VI/shop';
+    case 'propaganda':
+      return '/VI/propaganda';
+    case 'developer':
+      return '/VI/developer';
+    default:
+      return '/VI';
+  }
+}

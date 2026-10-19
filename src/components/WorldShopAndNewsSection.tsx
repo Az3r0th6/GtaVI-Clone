@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRightSvg, RockstarStarSvg } from './RockstarIcons';
 import { NEWSWIRE_ARTICLES, type NewswireArticle } from '../data/gtaData';
+import type { DeveloperProfile } from '../utils/preorderLogic';
 
 interface WorldShopAndNewsSectionProps {
   onOpenRadio: () => void;
@@ -9,7 +10,9 @@ interface WorldShopAndNewsSectionProps {
   onOpenStore: (category?: 'Merchandise' | 'Collector’s Box') => void;
   onOpenArticle: (article: NewswireArticle) => void;
   onOpenPropaganda: () => void;
+  onOpenDeveloper: () => void;
   propagandaCount: number;
+  developerProfile: DeveloperProfile;
 }
 
 export const WorldShopAndNewsSection: React.FC<WorldShopAndNewsSectionProps> = ({
@@ -19,7 +22,9 @@ export const WorldShopAndNewsSection: React.FC<WorldShopAndNewsSectionProps> = (
   onOpenStore,
   onOpenArticle,
   onOpenPropaganda,
+  onOpenDeveloper,
   propagandaCount,
+  developerProfile,
 }) => {
   return (
     <div className="w-full bg-[#11101d]">
@@ -396,7 +401,7 @@ export const WorldShopAndNewsSection: React.FC<WorldShopAndNewsSectionProps> = (
         </div>
 
         {/* ESRB Mature 17+ Box matching ref-sec10.png */}
-        <div className="flex items-start gap-4 text-left max-w-md border border-white/10 rounded-xl p-3.5 bg-[#151424]/60">
+        <div className="flex items-start gap-4 text-left max-w-md border border-white/10 rounded-xl p-3.5 bg-[#151424]/60 mb-14">
           <img
             src="/assets/vi/esrb_mature.svg"
             alt="ESRB Mature 17+"
@@ -412,6 +417,11 @@ export const WorldShopAndNewsSection: React.FC<WorldShopAndNewsSectionProps> = (
             <p className="text-white/60">In-Game Purchases.</p>
           </div>
         </div>
+
+        {/* Copyright */}
+        <p className="text-xs text-white/60 tracking-wide text-center">
+          © 2026 Martin Calvo Ruiz. Todos los derechos reservados.
+        </p>
       </footer>
     </div>
   );

@@ -5,14 +5,18 @@ interface NavbarAndHeroProps {
   onOpenTrailer: (trailerId: 'launch' | 'extended' | 'trailer2' | 'trailer1') => void;
   onOpenPreorder: (edition?: 'standard' | 'ultimate' | 'collectors') => void;
   onOpenNavMenu: () => void;
+  onOpenDeveloper: () => void;
   reservationCount: number;
+  developerName: string;
 }
 
 export const NavbarAndHero: React.FC<NavbarAndHeroProps> = ({
   onOpenTrailer,
   onOpenPreorder,
   onOpenNavMenu,
+  onOpenDeveloper,
   reservationCount,
+  developerName,
 }) => {
   return (
     <div className="relative w-full bg-[#11101d]">

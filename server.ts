@@ -1,4 +1,5 @@
 import express from 'express';
+import http from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
@@ -7,8 +8,11 @@ import {
   calculateOrderBreakdown,
   generateConfirmationCode,
   validatePropagandaSignup,
+  validateDeveloperProfile,
+  DEFAULT_DEVELOPER_PROFILE,
   EDITIONS,
   type PreorderInput,
+  type DeveloperProfile,
 } from './src/utils/preorderLogic.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -26,6 +30,14 @@ interface PropagandaSubscriber {
   birthYear: string;
   subscribedAt: string;
 }
+
+let developerProfile: DeveloperProfile = {
+  ...DEFAULT_DEVELOPER_PROFILE,
+  name: process.env.DEVELOPER_NAME || DEFAULT_DEVELOPER_PROFILE.name,
+  role: process.env.DEVELOPER_ROLE || DEFAULT_DEVELOPER_PROFILE.role,
+  email: process.env.DEVELOPER_EMAIL || DEFAULT_DEVELOPER_PROFILE.email,
+  renderUrl: process.env.RENDER_EXTERNAL_URL || DEFAULT_DEVELOPER_PROFILE.renderUrl,
+};
 
 const preorders: StoredPreorder[] = [
   {
@@ -81,6 +93,7 @@ const radioStationPlays: Record<string, number> = {
 
 async function startServer() {
   const app = express();
+  const httpServer = http.createServer(app);
   const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json());
@@ -92,7 +105,18 @@ async function startServer() {
       trailerViews,
       radioStationPlays,
       editions: EDITIONS,
+      developerProfile,
     });
+  });
+
+  app.post('/api/developer', (req, res) => {
+    const check = validateDeveloperProfile(req.body || {});
+    if (!check.valid || !check.sanitized) {
+      res.status(400).json({ error: check.error || 'Invalid developer profile' });
+      return;
+    }
+    developerProfile = check.sanitized;
+    res.json({ developerProfile });
   });
 
   app.post('/api/preorders', (req, res) => {
@@ -175,10 +199,54 @@ async function startServer() {
   });
 
   if (process.env.NODE_ENV !== 'production') {
+    app.get('/@vite/client', (_req, res) => {
+      res.type('application/javascript').send(`
+const sheetsMap = new Map();
+export function updateStyle(id, content) {
+  if (typeof document === 'undefined') return;
+  let style = sheetsMap.get(id);
+  if (!style) {
+    style = document.createElement('style');
+    style.setAttribute('type', 'text/css');
+    style.setAttribute('data-vite-dev-id', id);
+    style.textContent = content;
+    document.head.appendChild(style);
+  } else {
+    style.textContent = content;
+  }
+  sheetsMap.set(id, style);
+}
+export function removeStyle(id) {
+  const style = sheetsMap.get(id);
+  if (style && style.parentNode) {
+    style.parentNode.removeChild(style);
+    sheetsMap.delete(id);
+  }
+}
+export function createHotContext() {
+  return {
+    accept() {},
+    dispose() {},
+    prune() {},
+    invalidate() {},
+    on() {},
+    off() {},
+    send() {},
+    data: {},
+  };
+}
+export function injectQuery(url) {
+  return url;
+}
+export class ErrorOverlay extends HTMLElement {}
+`);
+    });
+
     const vite = await createViteServer({
       server: {
         middlewareMode: true,
         hmr: false,
+        watch: null,
       },
       appType: 'spa',
     });
@@ -191,7 +259,7 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
+  httpServer.listen(PORT, '0.0.0.0', () => {
     console.log(`Rockstar Games /VI Full-Stack Server listening on http://0.0.0.0:${PORT}`);
   });
 }
